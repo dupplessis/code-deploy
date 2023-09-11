@@ -1,31 +1,25 @@
 version: 0.2
 
-env:
-  parameter-store:
-    DOCKER_REGISTRY_USERNAME: /myapp/docker-credentials/username
-    DOCKER_REGISTRY_PASSWORD: /myapp/docker-credentials/password
-    DOCKER_REGISTRY_URL: /myapp/docker-registry/url
+# env:
+#   parameter-store:
+#      buildNumber: "/build-number/mycodebuild"
+
 phases:
-  install:
-    runtime-versions:
-      python: 3.11
   pre_build:
     commands:
-      - echo "Installing dependencies..."
-      - pip install -r day-13/simple-python-app/requirements.txt
+      #- echo Logging in to Amazon ECR
+      #- aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - echo logging into docker hub
+      - docker login --username csanoop50 --password "@Sanoop50"
   build:
     commands:
-      - echo "Running tests..."
-      - cd day-13/simple-python-app/
-      - echo "Building Docker image..."
-      - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY_URL"
-      - docker build -t "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest" .
-      - docker push "$DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_USERNAME/simple-python-flask-app:latest"
+      - echo Build started on `date`
+      - echo Building the Docker image.
+      - echo $CODEBUILD_BUILD_NUMBER
+      - docker build -t image:$CODEBUILD_BUILD_NUMBER .
+      - docker tag image:$CODEBUILD_BUILD_NUMBER csanoop50/test:$CODEBUILD_BUILD_NUMBER     
   post_build:
     commands:
-      - echo "Build completed successfully!"
-artifacts:
-  files:
-    - '**/*'
-  base-directory: ../simple-python-app
-
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push csanoop50/test:$CODEBUILD_BUILD_NUMBER
