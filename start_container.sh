@@ -2,7 +2,7 @@
 set -e
 
 # Pull the Docker image from Docker Hub
-echo
+echo docker pull csanoop50/test:6
 
 # Run the Docker image as a container
 echo
